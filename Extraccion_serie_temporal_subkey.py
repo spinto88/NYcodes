@@ -2,11 +2,12 @@
 # coding: utf-8
 
 """ Funcion para extraer la cantidad de tweets 
-y retweets de una dada keyword.
+y retweets de una dada subkeyword dentro keyword.
 En el main se puede iterar sobre diferentes keywords.
+Las subkeywords no son sensibles a las mayusculas.
 """
 
-def extraccion_serie_temporal(keyword, period):
+def extraccion_serie_temporal_subkeyword(keyword, sub_keyword, period):
 
     import os 
     import json
@@ -34,7 +35,17 @@ def extraccion_serie_temporal(keyword, period):
         for line in fp:
             # Para cada linea lee el json y extrae la fecha
             json_data = json.loads(line)
-            data2save.write(json_data['created_at'] + '\n')
+
+            # Me fijo si la subkeyword esta en el texto del tweet
+            # o en el texto original del retweet
+            if 'retweeted_status' in json_data.keys():
+                text = json_data['retweeted_status']['full_text']
+            else:
+                text = json_data['text']
+
+            # Minimizo la keyword y el tweet para homogeneizar
+            if sub_keyword.lower() in text.lower():
+                data2save.write(json_data['created_at'] + '\n')
         
     # Cierra el archivo a guardar 
     data2save.close()
@@ -67,7 +78,7 @@ def extraccion_serie_temporal(keyword, period):
     data_resampleada.columns = ['#t+rt']
     data_resampleada.index.name = 'date'
 
-    data_resampleada.to_csv('{}_por_dia.csv'.format(keyword))
+    data_resampleada.to_csv('{}_in_{}_por_dia.csv'.format(sub_keyword, keyword))
 
     # Borra el aux_ts.dat extraido del comprimido
     os.system("rm -rfv aux_ts.dat")
@@ -79,10 +90,10 @@ def extraccion_serie_temporal(keyword, period):
 
 if __name__ == "__main__":
 
-    keywords = ['alferdez', 'Espert']
+    keywords_subkeys = [['alferdez', 'cristina'], ['Espert', 'Scialabba']]
     period = "201908"
 
-    for keyword in keywords:
-        extraccion_serie_temporal(keyword, period)   
+    for key_subkey in keywords_subkeys:
+        extraccion_serie_temporal_subkeyword(key_subkey[0], key_subkey[1], period)   
 
 
