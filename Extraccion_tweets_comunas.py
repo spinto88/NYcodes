@@ -26,7 +26,7 @@ def extraccion_tweets_comunas(keyword, period, dict_comunas):
             # Si no es un retweet 
             if 'retweeted_status' not in json_data.keys():
                 # Id usuario
-                user_id = json_data['user']['id']
+                user_id = str(json_data['user']['id'])
 
                 # Manejo el error en caso que el usuario no tenga identificada la comuna
                 try:
