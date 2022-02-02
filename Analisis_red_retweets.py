@@ -2,18 +2,31 @@ import networkx as nx
 from community.community_louvain import best_partition
 import os
 import pandas as pd
-
+from funciones import *
+import json 
 path = os.getcwd()
 prev_path = path.replace('NYcodes','')
+data_path = prev_path + 'Data_procesada/'
+#keyword = 'Espert'
+# Archivos a levantar
+keywords = open(prev_path+'keywords.txt','r').readlines()
 
-keyword = 'Espert'
+# Archivo a levantar    
+for keyword in keywords[12::]:
+    print(keyword)
+    if ' ' not in keyword:
+        keyword = keyword.replace('\n','')
 
-rt_network = pd.read_csv(prev_path+'Data_procesada/'+keyword+'_red_rt.dat',sep = ' ', header = None) #retweet network
-rt_network.columns = ['source','target','weight']
-G = nx.from_pandas_edgelist(rt_network,'source','target',edge_attr = 'weight')
-print(nx.info(G))
-
-partition = best_partition(G,weight='weight')
+        rt_network = pd.read_csv(data_path + keyword + '_red_rt.dat',sep = ' ', header = None) #retweet network
+        rt_network.columns = ['source','target','weight']
+        G = nx.from_pandas_edgelist(rt_network,'source','target',edge_attr = 'weight')
+        print(nx.info(G))
+        print(keyword)
+        partition = best_partition(G,weight='weight')
+        with open(data_path+keyword + '_red_rt_comunidades.txt','w') as fp:
+            fp.write(json.dumps(partition))
+        #save_dict(partition, keyword + '_red_rt_comunas',data_path) # (dictionary, name, path = '')
+'''
 
 nx.set_node_attributes(G, partition, "community")
 c1 = [u for u,c in partition.items() if c ==0]
@@ -42,3 +55,4 @@ with open(prev_path + 'Data_procesada/'+keyword+'_redrt_comuna5.txt', 'w') as f:
         f.write("%s\n" % item)
 print(len(c1))
 print(len(c2))
+'''
